@@ -1,0 +1,324 @@
+---
+title: "Locomotion"
+date: "2026-09-30"
+---
+
+
+```{r}
+#| include: false
+
+library(knitr)
+library(tidyverse)
+library(brms)
+library(tidybayes)
+library(cmdstanr)
+library(glue)
+library(forcats)
+library(stringr)
+library(ggridges)
+library(posterior)
+library(tidytext)
+library(gt)
+library(ggnewscale)
+library(latex2exp)
+library(ggforce)
+library(readxl)
+library(patchwork)
+library(gganimate)
+library(distributional)
+library(reshape2)
+library(scales)
+library(arrow)
+
+sigfig <- function(vec, n = 3) {
+  ### function to round values to N significant digits
+  # input:  vec     vector of numeric
+  #         n       integer is the required sigfig  
+  # output: outvec  vector of numeric rounded to N sigfig
+  formatC(signif(vec, digits = n), digits = n, format = "fg", flag = "#") 
+}
+
+theme_set(theme_ggdist())
+theme_update(
+  text = element_text(size = 24),
+  plot.subtitle = element_text(hjust = 0.5),
+  legend.position = "bottom"
+)
+
+set_cmdstan_path(path = Sys.getenv("CMDSTAN_PATH"))
+
+knitr::knit_engines$set(
+  stan = function(options) {
+    code <- knitr:::one_string(options$code)
+    out <- options$output.var
+    if (!is.character(out) || length(out) != 1L) {
+      stop(
+        "the chunk option output.var must be a character string ",
+        "providing a name for the returned `CmdStanModel` object."
+      )
+    }
+    if (options$eval) {
+      if (options$cache) {
+        cache_path <- knitr:::valid_path(
+          options[["cache.path"]],
+          options$label
+        )
+        if (!dir.exists(cache_path)) {
+          dir.create(cache_path)
+        }
+        model_file <- tempfile(
+          fileext = ".stan",
+          tmpdir = cache_path
+        )
+        cat(code, "\n", file = model_file)
+      } else {
+        model_file <- write_stan_file(code)
+      }
+      csm <- cmdstan_model(model_file)
+      assign(out, csm, envir = knit_global())
+    }
+    knitr::engine_output(options, code, "")
+  }
+)
+```
+
+
+
+```{r}
+#| include: false
+
+df0 <- read_excel("D://workR/Blog/Projects/Locomotion/data/locomotion.xlsx", sheet = 1)
+
+df <- df0 %>% 
+  janitor::clean_names() %>% 
+  mutate(distance_m = distance_m + 0.01,
+         animal = as.factor(animal))
+
+df %>% 
+  filter(group == "VPA-METH") %>%
+  ggplot(aes(minute, distance_m, color = group)) +
+  geom_point(alpha = 0.8) +
+  geom_line(aes(group = animal), linewidth = 0.8) +
+  geom_smooth(aes(group = animal)) +
+  scale_y_log10() 
+
+df %>% 
+  group_by(animal, litter) %>% 
+  summarize(n = n()) %>% 
+  arrange(-n)
+```
+
+#### Model options
+
+##### y ~ 1 + time * group + (1 | animal) + Normal(0, sigma)
+
+```{r}
+#| include: false
+
+
+brm1 <- brm(bf(distance_m ~ 1 + minute * group + (1 | animal)),
+            family = gaussian(),
+            data = df,
+            backend = "cmdstanr",
+            cores = 4,
+            file = "brm1")
+
+# summary(brm1)
+# conditional_effects((brm1))
+```
+
+
+```{r}
+df %>% 
+  add_epred_draws(brm1, ndraws = 50, re_formula = NULL) %>% 
+  ggplot(aes(minute, distance_m, color = group)) +
+  geom_point(data = df) +
+  # geom_line(data = df, aes(group = animal)) +
+  geom_line(aes(y = .epred, group = paste(.draw, animal)), alpha = 0.1) +
+  facet_grid(model ~ meth) +
+  # scale_y_log10() +
+  labs(x = "Timepoints (minute)",
+       y = "Distance (m)",
+       color = NULL)
+```
+---
+
+
+##### y ~ 1 + time * group + (1 | animal) + (1 | time) + Normal(0, sigma)
+
+
+```{r}
+#| include: false
+
+
+brm2 <- brm(bf(distance_m ~ 1 + minute * group + (1 | animal) + (1 | minute)),
+            family = gaussian(),
+            data = df,
+            backend = "cmdstanr",
+            cores = 4,
+            file = "brm2")
+
+# summary(brm1)
+# conditional_effects((brm1))
+```
+
+
+```{r}
+df %>% 
+  add_epred_draws(brm2, ndraws = 50, re_formula = NULL) %>% 
+  ggplot(aes(minute, distance_m, color = group)) +
+  geom_point(data = df) +
+  # geom_line(data = df, aes(group = animal)) +
+  geom_line(aes(y = .epred, group = paste(.draw, animal)), alpha = 0.1) +
+  facet_grid(model ~ meth) +
+  # scale_y_log10() +
+  labs(x = "Timepoints (minute)",
+       y = "Distance (m)",
+       color = NULL)
+```
+
+---
+
+##### y ~ 1 + time * group + (1 | animal) + (1 | time) + (1 | litter) + Normal(0, sigma)
+
+
+```{r}
+#| include: false
+
+
+brm3 <- brm(bf(distance_m ~ 1 + minute * group + (1 | animal) + (1 | minute) + (1 | litter)),
+            family = gaussian(),
+            data = df,
+            backend = "cmdstanr",
+            cores = 4,
+            file = "brm3")
+
+# summary(brm1)
+# conditional_effects((brm1))
+```
+
+
+```{r}
+df %>% 
+  add_epred_draws(brm3, ndraws = 50, re_formula = NULL) %>% 
+  ggplot(aes(minute, distance_m, color = group)) +
+  geom_point(data = df) +
+  # geom_line(data = df, aes(group = animal)) +
+  geom_line(aes(y = .epred, group = paste(.draw, animal)), alpha = 0.1) +
+  facet_grid(model ~ meth) +
+  # scale_y_log10() +
+  labs(x = "Timepoints (minute)",
+       y = "Distance (m)",
+       color = NULL)
+```
+
+---
+
+##### y ~ 1 + gp(time, by =  group) + (1 | animal) + (1 | litter) + Normal(0, sigma)
+
+
+```{r}
+#| include: false
+
+
+
+brm4 <- brm(bf(distance_m ~ 1 + gp(minute, by = group, k = 5) + (1 | animal) + (1 | litter)),
+            family = gaussian(),
+            data = df,
+            backend = "cmdstanr",
+            cores = 4,
+            file = "brm4")
+
+# summary(brm2)
+# conditional_effects((brm2))
+```
+
+
+```{r}
+df %>% 
+  add_epred_draws(brm4, ndraws = 50, re_formula = NULL) %>% 
+  ggplot(aes(minute, distance_m, color = group)) +
+  geom_point(data = df) +
+  # geom_line(data = df, aes(group = animal)) +
+  geom_line(aes(y = .epred, group = paste(.draw, animal)), alpha = 0.1) +
+  facet_grid(model ~ meth) +
+  # scale_y_log10() +
+  labs(x = "Timepoints (minute)",
+       y = "Distance (m)",
+       color = NULL)
+```
+
+---
+
+
+#### Different random effects contribution
+
+#### No random effects
+
+```{r}
+df %>% 
+  add_epred_draws(brm3, ndraws = 50, re_formula = NA) %>% 
+  ggplot(aes(minute, distance_m, color = group)) +
+  geom_point(data = df) +
+  # geom_line(data = df, aes(group = animal)) +
+  geom_line(aes(y = .epred, group = paste(.draw, animal)), alpha = 0.1) +
+  facet_grid(model ~ meth) +
+  # scale_y_log10() +
+  labs(x = "Timepoints (minute)",
+       y = "Distance (m)",
+       color = NULL)
+```
+
+---
+
+#### Animal variability
+
+```{r}
+df %>% 
+  add_epred_draws(brm3, ndraws = 50, re_formula = ~ (1 | animal)) %>% 
+  ggplot(aes(minute, distance_m, color = group)) +
+  geom_point(data = df) +
+  # geom_line(data = df, aes(group = animal)) +
+  geom_line(aes(y = .epred, group = paste(.draw, animal)), alpha = 0.1) +
+  facet_grid(model ~ meth) +
+  # scale_y_log10() +
+  labs(x = "Timepoints (minute)",
+       y = "Distance (m)",
+       color = NULL)
+```
+
+---
+
+#### Litter variability
+
+```{r}
+df %>% 
+  add_epred_draws(brm3, ndraws = 50, re_formula = ~ (1 | litter)) %>% 
+  ggplot(aes(minute, distance_m, color = group)) +
+  geom_point(data = df) +
+  # geom_line(data = df, aes(group = animal)) +
+  geom_line(aes(y = .epred, group = paste(.draw, animal)), alpha = 0.1) +
+  facet_grid(model ~ meth) +
+  # scale_y_log10() +
+  labs(x = "Timepoints (minute)",
+       y = "Distance (m)",
+       color = NULL)
+```
+
+---
+
+#### Time-point variability
+
+```{r}
+df %>% 
+  add_epred_draws(brm3, ndraws = 50, re_formula = ~ (1 | minute)) %>% 
+  ggplot(aes(minute, distance_m, color = group)) +
+  geom_point(data = df) +
+  # geom_line(data = df, aes(group = animal)) +
+  geom_line(aes(y = .epred, group = paste(.draw, animal)), alpha = 0.1) +
+  facet_grid(model ~ meth) +
+  # scale_y_log10() +
+  labs(x = "Timepoints (minute)",
+       y = "Distance (m)",
+       color = NULL)
+```

@@ -1,0 +1,16 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Locomotion",
+    "section": "",
+    "text": "Model options\ny ~ 1 + time * group + (1 | animal) + Normal(0, sigma)\n\n\n\n\n\n\n\n\ny ~ 1 + time * group + (1 | animal) + (1 | time) + Normal(0, sigma)\n\n\n\n\n\n\n\n\ny ~ 1 + time * group + (1 | animal) + (1 | time) + (1 | litter) + Normal(0, sigma)\n\n\n\n\n\n\n\n\ny ~ 1 + gp(time, by = group) + (1 | animal) + (1 | litter) + Normal(0, sigma)\n\n\n\n\n\n\n\n\nDifferent random effects contribution\nNo random effects\n\n\n\n\n\n\n\n\nAnimal variability\n\n\n\n\n\n\n\n\nLitter variability\n\n\n\n\n\n\n\n\nTime-point variability"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this site\n\n\n[1] 2"
+  }
+]
