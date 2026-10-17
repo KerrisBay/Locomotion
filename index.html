@@ -146,7 +146,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><a href="#distance_m-1-minute-group-1-minute-animal-normal0-sigma" id="toc-distance_m-1-minute-group-1-minute-animal-normal0-sigma" class="nav-link" data-scroll-target="#distance_m-1-minute-group-1-minute-animal-normal0-sigma">distance_m ~ 1 + minute * group + (1 + minute | animal) + Normal(0, sigma)</a></li>
   <li><a href="#distance_m-1-minute-group-1-minute-animal-1-minute-normal0-sigma" id="toc-distance_m-1-minute-group-1-minute-animal-1-minute-normal0-sigma" class="nav-link" data-scroll-target="#distance_m-1-minute-group-1-minute-animal-1-minute-normal0-sigma">distance_m ~ 1 + minute * group + (1 + minute | animal) + (1 | minute) + Normal(0, sigma)</a></li>
   <li><a href="#distance_m-1-minute-group-1-minute-animal-1-minute-1-minute-litter-normal0-sigma" id="toc-distance_m-1-minute-group-1-minute-animal-1-minute-1-minute-litter-normal0-sigma" class="nav-link" data-scroll-target="#distance_m-1-minute-group-1-minute-animal-1-minute-1-minute-litter-normal0-sigma">distance_m ~ 1 + minute * group + (1 + minute | animal) + (1 | minute) + (1 + minute | litter) + Normal(0, sigma)</a></li>
-  <li><a href="#y-1-gptime-by-group-1-animal-1-litter-normal0-sigma" id="toc-y-1-gptime-by-group-1-animal-1-litter-normal0-sigma" class="nav-link" data-scroll-target="#y-1-gptime-by-group-1-animal-1-litter-normal0-sigma">y ~ 1 + gp(time, by = group) + (1 | animal) + (1 | litter) + Normal(0, sigma)</a></li>
+  <li><a href="#y-1-gptime-by-group-1-minute-animal-1-minute-litter-normal0-sigma" id="toc-y-1-gptime-by-group-1-minute-animal-1-minute-litter-normal0-sigma" class="nav-link" data-scroll-target="#y-1-gptime-by-group-1-minute-animal-1-minute-litter-normal0-sigma">y ~ 1 + gp(time, by = group) + (1 + minute | animal) + (1 + minute | litter) + Normal(0, sigma)</a></li>
   </ul>
 </li>
   <li><a href="#most-conservative-future-predictions-w-and-wo-re" id="toc-most-conservative-future-predictions-w-and-wo-re" class="nav-link" data-scroll-target="#most-conservative-future-predictions-w-and-wo-re">Most conservative future predictions w/ and w/o RE</a></li>
@@ -215,7 +215,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<hr></section><section id="y-1-gptime-by-group-1-animal-1-litter-normal0-sigma" class="level5"><h5 class="anchored" data-anchor-id="y-1-gptime-by-group-1-animal-1-litter-normal0-sigma">y ~ 1 + gp(time, by = group) + (1 | animal) + (1 | litter) + Normal(0, sigma)</h5>
+<hr></section><section id="y-1-gptime-by-group-1-minute-animal-1-minute-litter-normal0-sigma" class="level5"><h5 class="anchored" data-anchor-id="y-1-gptime-by-group-1-minute-animal-1-minute-litter-normal0-sigma">y ~ 1 + gp(time, by = group) + (1 + minute | animal) + (1 + minute | litter) + Normal(0, sigma)</h5>
 </section></section><section id="most-conservative-future-predictions-w-and-wo-re" class="level4"><h4 class="anchored" data-anchor-id="most-conservative-future-predictions-w-and-wo-re">Most conservative future predictions w/ and w/o RE</h4>
 <div class="cell">
 <div class="cell-output-display">
@@ -1026,7 +1026,7 @@ S_Figure&nbsp;4: Contrasts w/o RE
 <span id="cb1-252"><a href="#cb1-252" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-253"><a href="#cb1-253" aria-hidden="true" tabindex="-1"></a>---</span>
 <span id="cb1-254"><a href="#cb1-254" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-255"><a href="#cb1-255" aria-hidden="true" tabindex="-1"></a><span class="fu">##### y ~ 1 + gp(time, by =  group) + (1 | animal) + (1 | litter) + Normal(0, sigma)</span></span>
+<span id="cb1-255"><a href="#cb1-255" aria-hidden="true" tabindex="-1"></a><span class="fu">##### y ~ 1 + gp(time, by =  group) + (1 + minute | animal) + (1 + minute | litter) + Normal(0, sigma)</span></span>
 <span id="cb1-256"><a href="#cb1-256" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-257"><a href="#cb1-257" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-260"><a href="#cb1-260" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
@@ -1034,7 +1034,7 @@ S_Figure&nbsp;4: Contrasts w/o RE
 <span id="cb1-262"><a href="#cb1-262" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-263"><a href="#cb1-263" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-264"><a href="#cb1-264" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-265"><a href="#cb1-265" aria-hidden="true" tabindex="-1"></a>brm4 <span class="ot">&lt;-</span> <span class="fu">brm</span>(<span class="fu">bf</span>(distance_m <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> <span class="fu">gp</span>(minute, <span class="at">by =</span> group, <span class="at">k =</span> <span class="dv">15</span>) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> animal) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> litter)),</span>
+<span id="cb1-265"><a href="#cb1-265" aria-hidden="true" tabindex="-1"></a>brm4 <span class="ot">&lt;-</span> <span class="fu">brm</span>(<span class="fu">bf</span>(distance_m <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> <span class="fu">gp</span>(minute, <span class="at">by =</span> group, <span class="at">k =</span> <span class="dv">15</span>) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> minute <span class="sc">|</span> animal) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> minute <span class="sc">|</span> litter)),</span>
 <span id="cb1-266"><a href="#cb1-266" aria-hidden="true" tabindex="-1"></a>            <span class="at">family =</span> <span class="fu">gaussian</span>(),</span>
 <span id="cb1-267"><a href="#cb1-267" aria-hidden="true" tabindex="-1"></a>            <span class="at">data =</span> df,</span>
 <span id="cb1-268"><a href="#cb1-268" aria-hidden="true" tabindex="-1"></a>            <span class="at">backend =</span> <span class="st">"cmdstanr"</span>,</span>
@@ -1043,7 +1043,7 @@ S_Figure&nbsp;4: Contrasts w/o RE
 <span id="cb1-271"><a href="#cb1-271" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-272"><a href="#cb1-272" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-273"><a href="#cb1-273" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(brm4)</span>
-<span id="cb1-274"><a href="#cb1-274" aria-hidden="true" tabindex="-1"></a><span class="co"># conditional_effects((brm2))</span></span>
+<span id="cb1-274"><a href="#cb1-274" aria-hidden="true" tabindex="-1"></a><span class="co"># conditional_effects((brm4))</span></span>
 <span id="cb1-275"><a href="#cb1-275" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-276"><a href="#cb1-276" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-277"><a href="#cb1-277" aria-hidden="true" tabindex="-1"></a></span>
